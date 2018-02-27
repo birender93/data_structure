@@ -14,6 +14,7 @@ public:
 	{}
 };
 
+//O(n2) solution 
 node* createBstFrmPreodr(vector<int>& A, int st, int end)
 {
 	if(!A.size()) return nullptr;
@@ -34,6 +35,27 @@ node* createBstFrmPreodr(vector<int>& A, int st, int end)
 
 	if(A[i] > A[st])
 		root->right = createBstFrmPreodr(A, i, end);
+
+	return root;
+}
+
+node* createBstFrmPreodr_Oofn(vector<int>& A, int* indxer, int key, int min, int max)
+{
+	if(*indxer == A.size()) return nullptr;
+
+	node* root = nullptr;
+
+	if(key > min && key < max)
+	{
+		root = new node(key);
+		(*indxer)++;
+
+		if(*indxer < A.size())
+		{
+			root->left = createBstFrmPreodr_Oofn(A, indxer, A[*indxer], min, key);
+			root->right = createBstFrmPreodr_Oofn(A, indxer, A[*indxer], key, max);
+		}		
+	}
 
 	return root;
 }
@@ -81,6 +103,10 @@ int main()
 	}
 
 	node* root = createBstFrmPreodr(vec, 0, size-1);
+	lvlordrtrv(root);
+
+	int indx =0;
+	root = createBstFrmPreodr_Oofn(vec, &indx, vec[0], INT_MIN, INT_MAX);
 	lvlordrtrv(root);
 
 	return 0;
