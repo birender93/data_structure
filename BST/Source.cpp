@@ -14,6 +14,16 @@ public:
 	{}
 };
 
+class listnode
+{
+public:
+	int val;
+	listnode* next;
+
+	listnode(int x): val(x), next(nullptr)
+	{}
+};
+
 //O(n2) solution 
 node* createBstFrmPreodr(vector<int>& A, int st, int end)
 {
@@ -56,8 +66,35 @@ node* createBstFrmPreodr_Oofn(vector<int>& A, int* indxer, int key, int min, int
 			root->right = createBstFrmPreodr_Oofn(A, indxer, A[*indxer], key, max);
 		}		
 	}
-
 	return root;
+}
+
+//Convert a BST to a Binary Tree such that sum of all greater keys is added to every key
+
+void inordrTrv(node* root, vector<int>& vec, int& sum)
+{
+	if(!root) return;
+
+	if(root->left)
+		inordrTrv(root->left, vec, sum);
+
+	vec.push_back(root->val);
+	sum += root->val;
+
+	if(root->right)
+		inordrTrv(root->right, vec, sum);
+}
+
+void cnvBST(node* root, int& lsum)
+{
+	if(root->right)
+		cnvBST(root->right, lsum);
+	
+	root->val = root->val + lsum;
+	lsum = root->val;
+
+	if(root->left)
+		cnvBST(root->left, lsum);
 }
 
 void lvlordrtrv(node* root)
@@ -91,6 +128,38 @@ void lvlordrtrv(node* root)
 	cout << "\n\n";
 }
 
+node* createBSTfromList(listnode* lroot)
+{
+	if(!lroot) return nullptr;
+
+	listnode* sptr = lroot, *fptr = lroot->next;
+
+	if(fptr && fptr->next)
+		fptr = fptr->next;
+
+	while(fptr && fptr->next)
+	{
+		sptr = sptr->next;
+		fptr = fptr->next->next;
+	}
+	node* root;
+	if(sptr->next)
+	{
+		root = new node(sptr->next->val);
+		fptr = sptr->next->next;
+		sptr->next = nullptr;
+
+		root->left = createBSTfromList(lroot);
+		root->right = createBSTfromList(fptr);
+	}
+	else
+	{
+		root = new node(sptr->val);
+	}
+
+	return root;
+}
+
 int main()
 {
 	int arr[] = {10, 5, 1, 7, 40, 50};
@@ -102,12 +171,46 @@ int main()
 		vec.push_back(arr[i]);
 	}
 
-	node* root = createBstFrmPreodr(vec, 0, size-1);
-	lvlordrtrv(root);
+	//node* root = createBstFrmPreodr(vec, 0, size-1);
+	//lvlordrtrv(root);
 
-	int indx =0;
-	root = createBstFrmPreodr_Oofn(vec, &indx, vec[0], INT_MIN, INT_MAX);
+	//int indx =0;
+	//root = createBstFrmPreodr_Oofn(vec, &indx, vec[0], INT_MIN, INT_MAX);
+	//lvlordrtrv(root);
+
+	//node* root = new node(5);
+	//root->left = new node(2);
+	//root->right = new node(13);
+	//lvlordrtrv(root);
+
+	int lsum =0;
+	//cnvBST(root, lsum);
+	//lvlordrtrv(root);
+	
+	listnode* lroot = new listnode(1);
+	lroot->next = new listnode(2);
+	lroot->next->next = new listnode(3);
+	lroot->next->next->next = new listnode(4);
+	lroot->next->next->next->next = new listnode(5);
+	lroot->next->next->next->next->next = new listnode(6);
+	lroot->next->next->next->next->next->next = new listnode(7);
+
+	listnode* pcrawl = lroot;
+	while(pcrawl)
+	{
+		cout << pcrawl->val;
+		
+		if(pcrawl->next)
+			cout << "-->";
+
+		pcrawl = pcrawl->next;
+	}
+	cout << "\n\n";
+
+	node* root  = createBSTfromList(lroot);
 	lvlordrtrv(root);
 
 	return 0;
 }
+
+
