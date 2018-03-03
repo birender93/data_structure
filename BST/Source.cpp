@@ -160,6 +160,41 @@ node* createBSTfromList(listnode* lroot)
 	return root;
 }
 
+node* bstfromlist(listnode** lroot, int n)
+{
+	if(n == 0) return nullptr;
+
+	node* left = bstfromlist(lroot, n/2);
+
+	node* root = new node((*lroot)->val);
+
+	root->left = left;
+
+	*lroot = (*lroot)->next;
+
+	root->right = bstfromlist(lroot, n- n/2 -1);
+
+	return root;
+}
+
+node* createBSTfromList_On(listnode** lroot)
+{
+	node* root = nullptr;
+
+	int n =0;
+	listnode* temp = *lroot;
+
+	while(temp)
+	{
+		n++;
+		temp = temp->next;
+	}
+
+	root = bstfromlist(lroot, n);
+
+	return root;
+}
+
 int main()
 {
 	int arr[] = {10, 5, 1, 7, 40, 50};
@@ -209,6 +244,9 @@ int main()
 
 	node* root  = createBSTfromList(lroot);
 	lvlordrtrv(root);
+
+	//node* root = createBSTfromList_On(&lroot);
+	//lvlordrtrv(root);
 
 	return 0;
 }
