@@ -1,188 +1,211 @@
-#include <iostream>
+#include<iostream>
 using namespace std;
-#include<vector>
-#include<queue>
+#include<stack>
+#include <vector>
+#include <algorithm>
 
 class node
 {
 public:
-	node* left;
-	node* right;
-	int val;
+    int data;
+    node *left;
+    node *right;
+	int height;
 
-	node(int x): val(x), left(nullptr), right(nullptr)
+	node(int val): data(val), left(nullptr),right(nullptr)
 	{}
+
 };
 
-class listnode
+class lnode
 {
 public:
-	int val;
-	listnode* next;
+	int data;
+	lnode *next;
 
-	listnode(int x): val(x), next(nullptr)
+	lnode(int val):data(val), next(nullptr)
 	{}
+
 };
 
-//O(n2) solution 
-node* createBstFrmPreodr(vector<int>& A, int st, int end)
+
+node* makeBSTUtil(int arr[], int size, int& indx, int min, int max)
 {
-	if(!A.size()) return nullptr;
-
-	node* root = new node(A[st]);
-
-	if(st == end) return root;
-
-	int i=st+1;
-	for(; i<= end; i++)
-	{
-		if(A[i] > A[st])
-			break;
-	}
-
-	if(A[st+1] < A[st])
-		root->left = createBstFrmPreodr(A, st+1, i-1);
-
-	if(A[i] > A[st])
-		root->right = createBstFrmPreodr(A, i, end);
-
-	return root;
-}
-
-node* createBstFrmPreodr_Oofn(vector<int>& A, int* indxer, int key, int min, int max)
-{
-	if(*indxer == A.size()) return nullptr;
+	if(indx == size) return nullptr;
 
 	node* root = nullptr;
 
-	if(key > min && key < max)
+	if(arr[indx] > min && arr[indx] < max)
 	{
-		root = new node(key);
-		(*indxer)++;
+		root = new node(arr[indx]);
 
-		if(*indxer < A.size())
-		{
-			root->left = createBstFrmPreodr_Oofn(A, indxer, A[*indxer], min, key);
-			root->right = createBstFrmPreodr_Oofn(A, indxer, A[*indxer], key, max);
-		}		
+		indx++;
+		root->left = makeBSTUtil(arr, size, indx, min, root->data);
+
+		root->right = makeBSTUtil(arr, size, indx, root->data, max);
 	}
+
 	return root;
 }
 
-//Convert a BST to a Binary Tree such that sum of all greater keys is added to every key
-
-void inordrTrv(node* root, vector<int>& vec, int& sum)
+node* makeBST(int arr[], int size)
 {
-	if(!root) return;
+	int indx = 0;
 
-	if(root->left)
-		inordrTrv(root->left, vec, sum);
+	node* root = nullptr;
+	root = makeBSTUtil(arr, size, indx, INT_MIN, INT_MAX);
 
-	vec.push_back(root->val);
-	sum += root->val;
-
-	if(root->right)
-		inordrTrv(root->right, vec, sum);
+	return root;
 }
 
-void cnvBST(node* root, int& lsum)
+
+node* makeBSTitr(int arr[], int size)
 {
-	if(root->right)
-		cnvBST(root->right, lsum);
-	
-	root->val = root->val + lsum;
-	lsum = root->val;
+	if(size <1) return nullptr;
 
-	if(root->left)
-		cnvBST(root->left, lsum);
-}
+	stack<node*> st;
+	node* root = new node(arr[0]);
+	st.push(root);
 
-void lvlordrtrv(node* root)
-{
-	queue<node*> que;
-	int size = 1;
-	que.push(root);
-
-	while(!que.empty())
+	int indx = 1;
+	while(indx < size)
 	{
-		node* temp = que.front();
-		que.pop();
-
-		cout << temp->val << "\t";
-
-		if(temp->left)
-			que.push(temp->left);
-
-		if(temp->right)
-			que.push(temp->right);
-
-		size--;
-
-		if(!size && !que.empty())
+		if(st.top()->data > arr[indx])
 		{
-			size = que.size();
-			cout << endl;
+			st.top()->left = new node(arr[indx]);
+			st.push(st.top()->left);
 		}
+		else
+		{
+			node* top = nullptr;
+			while(!st.empty() && st.top()->data < arr[indx] )
+			{
+				top = st.top();
+				st.pop();
+			}
+
+			if(top)
+			{
+				top->right = new node(arr[indx]);
+				st.push(top->right);
+			}
+		}
+		indx++;
 	}
 
-	cout << "\n\n";
+
+	return root;
 }
 
-node* createBSTfromList(listnode* lroot)
+void preordr(node* root, vector<int>& vec)
 {
-	if(!lroot) return nullptr;
-
-	listnode* sptr = lroot, *fptr = lroot->next;
-
-	if(fptr && fptr->next)
-		fptr = fptr->next;
-
-	while(fptr && fptr->next)
+	if(root)
 	{
-		sptr = sptr->next;
-		fptr = fptr->next->next;
+		cout << root->data << "\t";	
+		vec.push_back(root->data);
 	}
-	node* root;
-	if(sptr->next)
-	{
-		root = new node(sptr->next->val);
-		fptr = sptr->next->next;
-		sptr->next = nullptr;
+	if(root->left)
+		preordr(root->left, vec);
 
-		root->left = createBSTfromList(lroot);
-		root->right = createBSTfromList(fptr);
-	}
-	else
+	if(root->right)
+		preordr(root->right, vec);
+}
+
+void inordr(node* root, vector<int>& vec)
+{
+	if(root)
 	{
-		root = new node(sptr->val);
+		if(root->left)
+			inordr(root->left, vec);
+
+		cout << root->data << "\t";	
+		vec.push_back(root->data);
+
+		if(root->right)
+			inordr(root->right, vec);
+	}
+}
+
+void cnvtoBSTUtil(node* root, vector<int>& vec, int& indx)
+{
+	if(root)
+	{
+		if(root->left)
+			cnvtoBSTUtil(root->left, vec, indx);
+
+		root->data = vec[indx];
+		indx++;
+
+		if(root->right)
+			cnvtoBSTUtil(root->right, vec, indx);
+	}
+
+}
+
+void cnvtoBST(node* root)
+{
+	vector<int> vec;
+	inordr(root,vec);
+	cout<<"\n";
+
+	std::sort(vec.begin(), vec.end());
+
+	int indx = 0;
+	cnvtoBSTUtil(root, vec, indx);
+}
+
+void cnvBSTtoBTutil(node* root, int& sum)
+{
+	if(root->right)
+		cnvBSTtoBTutil(root->right, sum);
+
+	sum += root->data;
+	root->data = sum;
+
+	if(root->left)
+		cnvBSTtoBTutil(root->left, sum);
+}
+
+void cnvBSTtoBT(node* root)
+{
+	int sum = 0;
+	cnvBSTtoBTutil(root, sum);		
+}
+
+lnode* createlist(int arr[], int size)
+{
+	lnode* root = new lnode(arr[0]);
+	lnode* temp = root;
+
+	for(int i=1; i<size; i++)
+	{
+		temp->next = new lnode(arr[i]);
+		temp = temp->next;
 	}
 
 	return root;
 }
 
-node* bstfromlist(listnode** lroot, int n)
+node* createBSTfromListUtil(lnode** lroot, int n)
 {
-	if(n == 0) return nullptr;
+	if(n<=0) return nullptr;
 
-	node* left = bstfromlist(lroot, n/2);
+	node* lnode = createBSTfromListUtil(lroot, n/2);
 
-	node* root = new node((*lroot)->val);
-
-	root->left = left;
+	node* root = new node((*lroot)->data);
+	root->left = lnode;
 
 	*lroot = (*lroot)->next;
 
-	root->right = bstfromlist(lroot, n- n/2 -1);
+	root->right = createBSTfromListUtil(lroot, n-n/2-1);
 
 	return root;
 }
 
-node* createBSTfromList_On(listnode** lroot)
+node* createBSTfromList(lnode* lroot)
 {
-	node* root = nullptr;
-
-	int n =0;
-	listnode* temp = *lroot;
+	int n=0;
+	lnode* temp = lroot;
 
 	while(temp)
 	{
@@ -190,65 +213,425 @@ node* createBSTfromList_On(listnode** lroot)
 		temp = temp->next;
 	}
 
-	root = bstfromlist(lroot, n);
+	node* root = createBSTfromListUtil(&lroot, n);
 
 	return root;
 }
 
+node* createTreeUtil(vector<int>& prevec, vector<int>& invec, int st, int en, int& preindx)
+{
+	node* root = new node(prevec[preindx]);
+	preindx++;
+
+	if(st == en)	return root;
+
+	int i=st;
+	while(i <= en && root->data != invec[i])
+		i++;
+
+	
+	root->left = createTreeUtil(prevec, invec, st, i-1, preindx);
+	root->right = createTreeUtil(prevec, invec, i+1, en, preindx);
+	
+	return root;
+}
+
+node* createTree(vector<int>& prevec, vector<int>& invec)
+{
+	node* root = new node(prevec[0]);
+
+	int i=0;
+	while(i<invec.size() && prevec[0] != invec[i])
+		i++;
+
+	int j =1;
+	root->left = createTreeUtil(prevec, invec, 0, i-1, j);
+
+	root->right = createTreeUtil(prevec, invec, i+1, prevec.size()-1, j);
+
+	return root;
+}
+
+int height(node* root)
+{
+	if(root == nullptr) return 0;
+
+	return std::max(height(root->left), height(root->right))+1;
+}
+
+bool isBalanced(node* root, int& height)
+{
+	bool flag = true;
+
+	if(root)
+	{		
+		int lh = 0;
+		flag = isBalanced(root->left, lh);
+		
+		if(flag == false) return flag;
+
+		int rh = 0;
+		flag = isBalanced(root->right, rh);
+
+		if(flag == false) return flag;
+
+		if( std::abs(lh-rh) > 1)
+			flag = false;
+
+		height += std::max(lh, rh)+1;
+	}	
+	return flag;
+}
+
+#include<queue>
+
+void levelordr(node* root, vector<int>& vec)
+{
+	cout <<"\n\n";
+	queue<node*> que;
+
+	que.push(root);
+	int size = que.size();
+
+	while(!que.empty())
+	{
+		node* temp = que.front();
+		que.pop();
+		size--;
+		cout <<temp->data<<"\t";
+		vec.push_back(temp->data);
+
+		if(temp->left)
+			que.push(temp->left);
+
+		if(temp->right)
+			que.push(temp->right);
+
+		if(size == 0)
+		{
+			cout << "\n";
+			size = que.size();
+		}
+	}
+}
+
+vector<node*> createNBST(int st, int en)
+{
+	vector<node*> vecBST;
+
+	if(st > en)
+	{
+		vecBST.push_back(NULL);
+		return vecBST;
+	}
+
+	for(int i =st; i<=en; i++)
+	{
+		vector<node*> lvec = createNBST(st, i-1);
+		vector<node*> rvec = createNBST(i+1, en);
+
+		for(int j=0; j< lvec.size(); j++)
+		{
+			node* lroot = lvec[j];
+
+			for(int k=0; k < rvec.size(); k++)
+			{
+				node* rroot = rvec[k];
+
+				node* root = new node(i);
+
+				root->left = lroot;
+				root->right = rroot;
+				vecBST.push_back(root);
+			}
+		}
+	}
+
+	return vecBST;
+}
+
+void cnvBSTtominheaputil(node* root, vector<int> ivec, int& indx)
+{
+	if(root)
+	{
+		root->data = ivec[indx];
+		indx++;
+
+		if(root->left)
+		cnvBSTtominheaputil(root->left, ivec, indx);
+
+		if(root->right)
+		cnvBSTtominheaputil(root->right, ivec, indx);
+	}
+}
+
+void cnvBSTtominheap(node* root)
+{
+	vector<int> ivec;
+
+	inordr(root, ivec);
+
+	int indx =0;
+	cnvBSTtominheaputil(root, ivec, indx);
+
+}
+
+void prn_vec(vector<int> vec2)
+{
+	cout <<"\n\n";
+	for(int i =0; i < vec2.size(); i++)
+	{
+		cout << vec2[i] << "\t";
+	}
+
+	cout <<"\n\n";
+}
+
+void setchild(node* pnode, node* root,vector<int>& vec,  int& indx)
+{
+	if(indx == vec.size()) return;
+
+	if(pnode == nullptr)
+	{
+		if(root->data > vec[indx])
+		{
+			root->left = new node(vec[indx]);
+			indx++;
+		}
+
+		if(root->data < vec[indx])
+		{
+			root->right = new node(vec[indx]);
+			indx++;
+		}		
+	}
+	else if(vec[indx] < pnode->data)
+	{
+		if(root->data > vec[indx])
+		{
+			root->left = new node(vec[indx]);
+			indx++;
+		}
+
+		if(root->data < vec[indx])
+		{
+			root->right = new node(vec[indx]);
+			indx++;
+		}
+	}
+
+	if(root->left)
+	{
+		setchild(root, root->left, vec,indx);
+	}
+
+	if(root->right)
+	{
+		setchild(root, root->right, vec,indx);
+	}
+}
+
+node* createBSTfromlvlTrv(vector<int> vec)
+{
+	node* pnode = nullptr;
+	node* root = new node(vec[0]);
+
+	int indx =1;
+	setchild(pnode, root, vec, indx);
+	
+
+	return root;
+}
+
+bool checkforBSTutil(node* root, int& i)
+{
+	if(root == NULL) return true;
+
+	if(!(checkforBSTutil(root->left, i)))
+		return false;
+
+	if(root->data <= i)
+		return false;
+
+	i = root->data;
+
+	if(!(checkforBSTutil(root->right, i)))
+		return false;
+
+	return true;
+}
+
+bool checkforBST(node* root)
+{
+	int i = INT_MIN;
+	return checkforBSTutil(root, i);
+}
+
+int KthSmallElemBST(node* root, int& k)
+{
+	int i = INT_MIN;
+
+	if(root == NULL || k < 1) return i;
+
+	i = KthSmallElemBST(root->left, k);
+
+	if(k)
+	{
+		k--;
+		i = root->data;
+
+		if(!k)
+			return i;
+
+		i = KthSmallElemBST(root->right, k);
+	}
+
+	return i;
+}
+
+bool check_1child(int pre[], int size)
+{
+	bool flag = true;
+
+	if(size <= 1) return flag;
+
+	int min = INT_MIN;
+	int max = INT_MAX;
+
+	if(pre[0] < pre[1])
+	{
+		min = pre[0];
+		max = pre[1];
+	}
+	else
+	{
+		max = pre[0];
+		min = pre[1];
+	}
+
+	for(int i=2; i<size; i++)
+	{
+		if(pre[i] < min)	
+	}
+}
+
 int main()
 {
-	int arr[] = {10, 5, 1, 7, 40, 50};
-	int size = sizeof(arr)/sizeof(arr[0]);
-	vector<int> vec;
+	//int arr[] = {50,40,7,1,5,10};
+	//vector<int> vec;
+	//node* root = nullptr;
 
-	for(int i=0; i< size; i++)
-	{
-		vec.push_back(arr[i]);
-	}
+	//int n = sizeof(arr)/sizeof(arr[0]);
+	//root = makeBST(arr, n);
 
-	//node* root = createBstFrmPreodr(vec, 0, size-1);
-	//lvlordrtrv(root);
+	//preordr(root);
+	//cout<<"\n\n";
+	//inordr(root, vec);
+	//cout<<"\n\n";
 
-	//int indx =0;
-	//root = createBstFrmPreodr_Oofn(vec, &indx, vec[0], INT_MIN, INT_MAX);
-	//lvlordrtrv(root);
+	//root = makeBSTitr(arr, n);
+	//
+	//preordr(root);
+	//cout<<"\n\n";
+	//inordr(root, vec);
+	//cout<<"\n\n";
 
-	//node* root = new node(5);
-	//root->left = new node(2);
-	//root->right = new node(13);
-	//lvlordrtrv(root);
+	//root = new node(10);
+ //   root->left = new node(30);
+ //   root->right = new node(15);
+ //   root->left->left = new node(20);
+ //   root->right->right = new node(5);
 
-	int lsum =0;
-	//cnvBST(root, lsum);
-	//lvlordrtrv(root);
+	/*vec.clear();
+	cnvtoBST(root);
+	cout<<"\n\n";
+	preordr(root,vec);
+	cout<<"\n\n";
+	inordr(root, vec);
+	cout<<"\n\n";
+
+	cnvBSTtoBT(root);
+	cout<<"\n\n";
+	preordr(root,vec);
+	cout<<"\n\n";
+	inordr(root, vec);
+	cout<<"\n\n";*/
+	vector<int> vec2;
+
+	int larr[] = {1,2,3,4,5,6,7};
+	int lsize = sizeof(larr)/sizeof(larr[0]);
+	lnode* lroot = createlist(larr, lsize);
+	node* lstnoderoot = createBSTfromList( lroot);
+	levelordr( lstnoderoot, vec2 );
+	cout<<"\n\n";
+
+	//vec.clear();
 	
-	listnode* lroot = new listnode(1);
-	lroot->next = new listnode(2);
-	lroot->next->next = new listnode(3);
-	lroot->next->next->next = new listnode(4);
-	lroot->next->next->next->next = new listnode(5);
-	lroot->next->next->next->next->next = new listnode(6);
-	lroot->next->next->next->next->next->next = new listnode(7);
+ 	/*cout<<"\n\n";
+	preordr(lstnoderoot, vec2);
+	cout<<"\n\n";
+	inordr(lstnoderoot, vec);
+	cout<<"\n\n";
 
-	listnode* pcrawl = lroot;
-	while(pcrawl)
+	node* croot = createTree(vec2, vec);
+	cout<<"\n\n";
+	vec2.clear();
+	preordr(croot, vec2);
+	cout<<"\n\n";
+	vec.clear();
+	inordr(croot, vec);
+	cout<<"\n\n";*/
+
+	//int height =0;
+	//bool flag = isBalanced(lstnoderoot, height);
+
+	//cout << "flag: " << flag << "\t" << "height: " << height << endl;
+
+	/*vector<node*> vec_bst;
+	
+	vec_bst = createNBST(1,3);
+
+	for(int i=0; i< vec_bst.size(); i++)
 	{
-		cout << pcrawl->val;
-		
-		if(pcrawl->next)
-			cout << "-->";
+		cout << "For" << i << ":" << endl;
+		preordr(vec_bst[i], vec2);
+		cout<<endl;
+		levelordr( vec_bst[i] );
+		cout<<"\n\n";
+	}*/
 
-		pcrawl = pcrawl->next;
-	}
-	cout << "\n\n";
+	//cnvBSTtominheap( lstnoderoot);
+	//cout<<"\n\n";
+	//levelordr( lstnoderoot );
+	//cout<<"\n\n";
+	//preordr(lstnoderoot, vec2);
+	//cout<<"\n\n";
 
-	node* root  = createBSTfromList(lroot);
-	lvlordrtrv(root);
+	//vec2.clear();
+	//levelordr( lstnoderoot, vec2 );
+	//prn_vec(vec2);
 
-	//node* root = createBSTfromList_On(&lroot);
-	//lvlordrtrv(root);
+	//node* bstnode = createBSTfromlvlTrv(vec2);
+	//vec2.clear();
+	//levelordr( bstnode, vec2 );
 
-	return 0;
+	//cout <<"\n\n";
+	//cout << checkforBST(bstnode)<<"\n\n";
+
+	//cout<<"\n\n";
+	//
+	//int k=5;
+	//cout << KthSmallElemBST(bstnode,k) <<"\n\n";
+
+	int pre[] = {20, 10, 11, 13, 12};
+
+	int size = sizeof(pre)/sizeof(pre[0]);
+
+	cout << check_1child(pre, size);
+
 }
+
+
+
 
 

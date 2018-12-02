@@ -1,0 +1,8 @@
+22, Data Structures, 45
+23, English, 52
+22, English, 59
+26, Data Structures, 72
+23, Data Structures, 21
+26, English, 81
+
+
