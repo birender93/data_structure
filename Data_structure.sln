@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "binary_tree", "binary_tree\binary_tree.vcxproj", "{6779EB13-0F19-4C34-A9F8-BC915827DB85}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tree", "binary_tree\binary_tree.vcxproj", "{6779EB13-0F19-4C34-A9F8-BC915827DB85}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "linklist", "linklist\linklist.vcxproj", "{11863ACB-1993-4D91-B07C-6A6936EB5082}"
 EndProject
@@ -76,8 +76,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
